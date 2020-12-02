@@ -1,0 +1,63 @@
+---
+title: "Reproducible survey research"
+author: "Benjamin Desta"
+date: "25/11/2020"
+output: 
+  ioslides_presentation:
+    css: styles.css
+    logo: SRC_logo.png 
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = FALSE)
+library(glue)
+library(plotly)
+library(magrittr)
+```
+
+## What is reproducible research and replication
+
+- Replication is the process in which the whole project from data collection through to analysis has been replicated.
+
+- Reproducible research is the idea that data analyses, and general scientific claims, are published with their data and software code.
+
+## Why reproducible research is important
+- Replication is not feesible for all research projects, therefore it's vital that the analysis is reproducible as this is the only thing a reviewer can gaurantee about these studies.
+
+- Reproducibility is important because it gives readers and reviewers confidence in understanding exactly what was done in the study.
+
+## The reproducibility crisis in the social sciences
+-  A methodological crisis where many scientific studies are difficult or impossible to replicate or reproduce.
+
+- Other fields struggle with reproducibility. However social sciences face a distinct challenge, measuring human behavior/sentiment is less precise than measuring blood pressure for example.
+
+- The Center for Open Science began The Reproducibility Project in November 2011, a project where 270 contributing authors set out to repeat 100 published psychological studies. Only ~36% of the studies were replicatable.
+
+## What makes research reproducible?
+
+<img src="/Users/Binny/Documents/R/Reproducible research/Reproducible research flow chart.png" width="800"/>
+
+## What tools can I use to produce reproducable research?
+
+- Rmarkdown
+
+- Jupyter notebook 
+
+- Git/Github
+
+## Rmarkdown report example
+
+- Here's one I prepared earlier...
+
+<img src="/Users/Binny/Documents/R/Reproducible research/Prepared_earlier.gif" width="500"/>
+
+## Conclusion
+
+- Replication is still best method for research validation, reproducible research is the middle ground to replication.
+- Utilities such as Rmarkdown/Jupyter notebook and platforms like github simplify generating reproducible research.
+
+## Question time
+
+You can find this presentation at https://github.com/benjamin-desta/acspri_reproducible_research
+
+Please email me at benjamin.desta@srcentre.com.au if you have any question regarding this presentation or the rmarkdown report generated.

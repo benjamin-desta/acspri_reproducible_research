@@ -1,0 +1,160 @@
+---
+title: "Pew research analysis"
+author: "Benjamin Desta"
+date: "30/11/2020"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+Imported libraries required for analysis
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+library(magrittr)
+library(haven)
+library(glue)
+library(dplyr)
+library(plotly)
+```
+
+## Pew Research Centre Political Survey Analysis
+
+The aim of this report is to demonstrate some of the features and functionality available when generating reports through Rmarkdown and to demonstrate how an Rmarkdown report and reproducible research work hand in hand. By no means is the analysis in this report attempting to draw any conclusions or construct a narrative around the political sentiment in the United States.
+
+Pew Research Center is a nonpartisan fact tank whose mission statement is to inform the public about the issues, attitudes and trends shaping the world. Pew research centre conduct public opinion polling, demographic research, content analysis and other data-driven social science research. Pew research make their data available for free download once they have conducted appropriate measures to clean, de-identify, analyse and report on said data. Visit https://www.pewresearch.org/ for more information.
+
+### Reading in data
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Reading in Pew Research Centre January 2020 Political Survey data
+raw <- read_sav("../Jan20 Political Survey/Jan20 public.sav")
+
+# Adding recoded variables with value label for analysis
+dat <- raw %>% mutate(age_grp = case_when(
+                                       # Age grouping
+                                       age >= 18 & age < 30 ~ "18-29 years",
+                                       age >= 30 & age < 40 ~ "30-39 years",
+                                       age >= 40 & age < 50 ~ "40-49 years",
+                                       age >= 50 & age < 60 ~ "50-59 years",
+                                       TRUE ~ "60+ years"),
+                                       # Race variable
+                      race = case_when(racecmb %in% 1 ~ "White",
+                                       racecmb %in% 2 ~ "Black or African-American",
+                                       racecmb %in% 3 ~ "Asian or Asian-American",
+                                       racecmb %in% 4 ~ "Mixed Race",
+                                       racecmb %in% 5 ~ "Other",
+                                       racecmb %in% 9 ~ "Dont Know/Refused"),
+                      
+                                       # Q1 variable
+                      q1_desc = case_when(q1 %in% 1 ~ "Satisfied",
+                                          q1 %in% 2 ~ "Dissatisfied",
+                                          q1 %in% 9 ~ "Don't know/Refused"),
+                      
+                                       # Q2 variable
+                      q2_desc = case_when(q2 %in% 1 ~ "Approve",
+                                          q2 %in% 2 ~ "Disapprove",
+                                          q2 %in% 9 ~ "Don't know/Refused"),
+                      
+                                       # Q25 variable, wrapping text to fit on axis
+                      q25_desc = case_when(q25f1 %in% 1 ~ paste(strwrap("They have not worked as hard as most other people", width = 12), collapse = "<br>"),
+                                           q25f1 %in% 2 ~ paste(strwrap("They have faced more obstacles in life than most other people", width = 12), collapse = "<br>"),
+                                           q25f1 %in% 3 ~ "Both",
+                                           q25f1 %in% 9 ~ paste(strwrap("Don't Know/Refused", width = 12), collapse = "<br>")),
+                      
+                                       # Q40 variable, wrapping text to fit on axis
+                      q40_desc = case_when(q40 %in% 1 ~ paste(strwrap("Strongly favor", width = 8), collapse = "<br>"),
+                                           q40 %in% 2 ~ paste(strwrap("Somewhat favor", width = 8), collapse = "<br>"),
+                                           q40 %in% 3 ~ paste(strwrap("Somewhat oppose", width = 8), collapse = "<br>"),
+                                           q40 %in% 4 ~ paste(strwrap("Strongly oppose", width = 8), collapse = "<br>"),
+                                           q40 %in% 9 ~ paste(strwrap("Don’t know/Refused", width = 8), collapse = "<br>")))
+```
+
+This research dataset can be found here: https://www.pewresearch.org/politics/dataset/january-2020-political-survey/ and was accessed on Novemeber 25th 2020.
+
+### Analysis
+I've decided to do some very straight forward analysis of the Pew Research Centre January 2020 Political Survey, displaying responses to a handful of political questions broken down by race.
+
+We can choose to display Rcode or not to, for example you may feel it's not overtly important to display the recoding of survey variables if you've provided a data dictionary and choose not to display the variable recodes as I've done.
+
+First up I've decided to analyse question 2 in the questionnaire **Do you approve or disapprove of the way Donald Trump is handling his job as President?** Displaying this item in a bar graph breaking the data down by race, in this case proportion of race.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Breaking down by race and deriving proportion of race variable.
+fig <- dat %>% group_by(race) %>% count(q2_desc) %>% mutate(prop_race = round((n/sum(n) * 100), 2))
+
+# Plotting Q2 by proportion of race 
+fig %<>% plot_ly(x = ~q2_desc, y = ~prop_race, color = ~race)
+
+fig %<>% layout(title = 'How do you feel Donald Trump is handling his job as President?',
+               xaxis = list(
+                 title = ""),
+               yaxis = list(
+                 title = 'Proportion of Race (%)'))
+
+fig
+
+```
+Some of the interesting things we can deduce from this bar chart;
+
+* Respondents who indentified as White were the only race in which the majority approved the way Donald Trump was handling his Presidency.
+
+* The Black/African-American cohort had the largest approval/disapproval contrast with only 13.4% approving the way Trump was handling his presidency and a staggering 82.6% disapproving.
+
+* Respondent who either didn't know their race or refused to supply it we're split down the middle with 48.2% Approving and 48.2% Disapproving the way Trump was handling his presidency.
+
+Next up I thought it would be interesting to analyse question 25 **In your opinion which generally has more to do with why a person is poor?** Again I will be displaying this item as a bar chart breaking the data down by proportion of race, as done above.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Breaking down by race and deriving proportion of race variable.
+fig2 <- dat %>% group_by(race) %>% count(q25_desc) %>% mutate(prop_race = round((n/sum(n) * 100), 2))
+
+# Plotting Q2 by proportion of race 
+fig2 %<>% plot_ly(x = ~q25_desc, y = ~prop_race, color = ~race)
+
+fig2 %<>% layout(title = 'Which generally has more to do with why a person is poor?',
+               xaxis = list(
+                 title = ""),
+               yaxis = list(
+                 title = 'Proportion of Race (%)'))
+
+fig2
+
+```
+
+Again there are some interesting things we can see from this bar chart;
+
+* The Black/African-American respondents we're the largest cohort that felt of the options given the main factor for a person being poor was that they had faced more obstacles in life than most other people (77.2%), followed by the Mixed Race cohort (66.3%).
+
+* As a proportion of race, only 11.4% of Black/African-Americans believed that the main factor for a person being poor was because they had not worked as hard as most other people, the least of all cohorts.
+
+* The cohort who most felt that the main factor for a person being poor was because they had not worked as hard as most other people were the respondents who fell into the "Other" race.
+
+Finally I wanted to look at Question 40. **Would you strongly favor, somewhat favor, somewhat oppose, or strongly oppose a single national health insurance program run by the government, sometimes called “Medicare for all,” that would replace private insurance?** as this has been a contentious topic in the United States for some time now, I wanted to take a look at how respondents of differing age groups felt about national health insurance.
+
+```{r, echo = TRUE, warning = FALSE, message = FALSE}
+# Breaking down by age group and deriving proportion of age group variable.
+fig3 <- dat %>% group_by(age_grp) %>% count(q40_desc) %>% mutate(prop_age_grp = round((n/sum(n) * 100), 2))
+
+# Plotting Q2 by proportion of race 
+fig3 %<>% plot_ly(x = ~q40_desc, y = ~prop_age_grp, color = ~age_grp)
+
+fig3 %<>% layout(title = paste(strwrap('Would you favor a single national health insurance program run by the government?', width = 60), collapse = "<br>"),
+               xaxis = list(
+                 title = ""),
+               yaxis = list(
+                 title = 'Proportion of Age Group (%)'))
+
+fig3
+
+```
+
+Interesting to see that respondents in the two youngest age groups (18-29 years and 30-39 years) we're the cohorts who most favoured and least opposed a single national health insurance program run by the government.
+
+### Conclusion
+Rmarkdown is an amazing tool that can be used to produce reports that could be used as supplimentary information when submitting a research paper. Fellow researchers, scrutineers and readers are able to clearly audit your analysis, replicate your findings and potentially expand on the research. This is an example utilising Rmarkdown however if you are a Python user Jupyter notebooks would be the alternative with essentially the same features.
+
+### Appendix
+Package versions
+```{r}
+sessionInfo()
+```
